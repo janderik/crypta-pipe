@@ -15,7 +15,6 @@ RUN useradd -m -u 1000 cryptapipe
 WORKDIR /app
 COPY --from=builder /root/.local /home/cryptapipe/.local
 COPY src/ src/
-COPY certs/ certs/
 
 ENV PATH=/home/cryptapipe/.local/bin:$PATH \
     PYTHONPATH=/app \

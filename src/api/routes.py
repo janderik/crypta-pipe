@@ -2,18 +2,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Request
+from pydantic import BaseModel
 
 from src.audit.lineage import LineageTracker
 from src.audit.logger import AuditLogger
 from src.crypto.encryptor import Encryptor
 from src.crypto.key_manager import KeyManager
 from src.crypto.signing import Signer
-from src.pipeline.consumer import PipelineConsumer
-from src.pipeline.processor import PipelineProcessor
 from src.pipeline.producer import PipelineProducer
 
 router = APIRouter()
@@ -98,7 +95,7 @@ async def publish(req: PublishRequest, request: Request) -> PublishResponse:
 
 
 @router.get("/audit")
-async def get_audit(tail: Optional[int] = 50) -> AuditResponse:
+async def get_audit(tail: int = 50) -> AuditResponse:
     entries = _audit.tail(n=tail)
     return AuditResponse(
         entries=[
@@ -134,7 +131,7 @@ async def get_provenance(node_id: str) -> dict:
 
 @router.post("/lineage/node")
 async def create_node(
-    node_type: str, name: str, metadata: Optional[str] = None
+    node_type: str, name: str, metadata: str | None = None
 ) -> dict:
     md = json.loads(metadata) if metadata else {}
     nid = _lineage.register_node(node_type=node_type, name=name, metadata=md)

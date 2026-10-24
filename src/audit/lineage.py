@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import json
-import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -30,7 +28,7 @@ class LineageEdge:
 class LineageTracker:
     """Track data provenance through the pipeline with a directed graph."""
 
-    def __init__(self, store_path: Optional[Path] = None) -> None:
+    def __init__(self, store_path: Path | None = None) -> None:
         self._path = store_path or Path("lineage.json")
         self._nodes: dict[str, LineageNode] = {}
         self._edges: list[LineageEdge] = []
@@ -60,7 +58,7 @@ class LineageTracker:
         self,
         node_type: str,
         name: str,
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> str:
         node_id = str(uuid.uuid4())
         node = LineageNode(
@@ -78,7 +76,7 @@ class LineageTracker:
         source_id: str,
         target_id: str,
         transform: str = "",
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> str:
         if source_id not in self._nodes:
             raise ValueError(f"Unknown source node: {source_id}")

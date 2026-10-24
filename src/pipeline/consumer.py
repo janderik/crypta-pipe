@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import msgpack
 
-from src.audit.logger import AuditLogger
 from src.audit.lineage import LineageTracker
+from src.audit.logger import AuditLogger
 from src.crypto.encryptor import Encryptor
 from src.crypto.signing import Signer
 
@@ -32,15 +32,15 @@ class PipelineConsumer:
         self._lineage = lineage
         self._redis = redis_client
         self._stream = stream
-        self._sink_node: Optional[str] = None
+        self._sink_node: str | None = None
 
-    async def register_sink(self, name: str, metadata: Optional[dict] = None) -> str:
+    async def register_sink(self, name: str, metadata: dict | None = None) -> str:
         self._sink_node = self._lineage.register_node(
             node_type="sink", name=name, metadata=metadata
         )
         return self._sink_node
 
-    async def consume(self, msg_id: str, raw_data: bytes) -> Optional[dict]:
+    async def consume(self, msg_id: str, raw_data: bytes) -> dict | None:
         try:
             envelope = msgpack.unpackb(raw_data)
             ciphertext = envelope[b"ciphertext"]
@@ -82,7 +82,7 @@ class PipelineConsumer:
 
             logger.info("Consumed and decrypted message %s", msg_id)
             return data
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - worker boundary: log, audit and keep running
             logger.error("Failed to consume %s: %s", msg_id, exc)
             self._audit.log(
                 action="consume_error",
@@ -91,7 +91,7 @@ class PipelineConsumer:
             )
             return None
 
-    async def consume_latest(self) -> Optional[tuple[str, dict]]:
+    async def consume_latest(self) -> tuple[str, dict] | None:
         results = await self._redis.xread({self._stream: "$"}, count=1)
         for stream_name, messages in results:
             for msg_id, msg_data in messages:

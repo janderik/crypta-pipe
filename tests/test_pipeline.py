@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from src.audit.lineage import LineageTracker
-from src.audit.logger import AuditLogger
+from src.audit.logger import AuditLogger, SecurityError
 from src.crypto.encryptor import Encryptor
 from src.crypto.key_manager import KeyManager
 from src.crypto.signing import Signer
@@ -60,7 +60,7 @@ class TestAuditLogger:
         changed["action"] = "hacked"
         lines[0] = json.dumps(changed, sort_keys=True, separators=(",", ":"))
         audit._log_path.write_text("\n".join(lines) + "\n")
-        with pytest.raises(Exception):
+        with pytest.raises(SecurityError):
             AuditLogger(log_path=audit._log_path)
 
 

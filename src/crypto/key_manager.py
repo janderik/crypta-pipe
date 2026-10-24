@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+logger = logging.getLogger(__name__)
 
 @dataclass
 class KeyPair:
@@ -30,7 +32,7 @@ class KeyManager:
     def __init__(self, store_dir: Path = Path("./certs")):
         self._store = store_dir.resolve()
         self._store.mkdir(parents=True, exist_ok=True)
-        self._active: Optional[KeyPair] = None
+        self._active: KeyPair | None = None
         self._archive: dict[str, KeyPair] = {}
         self._salt = self._load_or_create_salt()
         self._load_keys()
@@ -78,10 +80,10 @@ class KeyManager:
     @property
     def active(self) -> KeyPair:
         if self._active is None:
-            self.generate_key_pair()
+            return self.generate_key_pair()
         return self._active
 
-    def get_key(self, key_id: str) -> Optional[KeyPair]:
+    def get_key(self, key_id: str) -> KeyPair | None:
         if self._active and self._active.key_id == key_id:
             return self._active
         return self._archive.get(key_id)
@@ -127,5 +129,6 @@ class KeyManager:
                 if self._active is None:
                     self._active = kp
                 self._archive[kid] = kp
-            except Exception:
+            except (OSError, ValueError, TypeError, UnsupportedAlgorithm) as exc:
+                logger.warning("Ignoring unreadable key file %s: %s", pem_path.name, exc)
                 continue

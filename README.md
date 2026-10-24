@@ -1,6 +1,6 @@
 # 🔐 CryptaPipe
 
-[![CI](https://github.com/cryptapipe/cryptapipe/actions/workflows/ci.yml/badge.svg)](https://github.com/cryptapipe/cryptapipe/actions/workflows/ci.yml)
+[![CI](https://github.com/janderik/crypta-pipe/actions/workflows/ci.yml/badge.svg)](https://github.com/janderik/crypta-pipe/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Ruff](https://img.shields.io/badge/code%20style-ruff-000000)](https://github.com/astral-sh/ruff)
@@ -47,8 +47,8 @@ End-to-end encrypted secure data pipeline with tamper-evident audit logging and 
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/cryptapipe/cryptapipe.git
-cd cryptapipe
+git clone https://github.com/janderik/crypta-pipe.git
+cd crypta-pipe
 pip install -r requirements.txt
 
 # 2. Start Redis (optional, for pipeline)
