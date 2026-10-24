@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import msgpack
 
-from src.audit.logger import AuditLogger
 from src.audit.lineage import LineageTracker
+from src.audit.logger import AuditLogger
 
 logger = logging.getLogger(__name__)
 
@@ -28,17 +28,17 @@ class PipelineProcessor:
         self._redis = redis_client
         self._input = input_stream
         self._output = output_stream
-        self._transform_node: Optional[str] = None
+        self._transform_node: str | None = None
 
     async def register_transform(
-        self, name: str, metadata: Optional[dict] = None
+        self, name: str, metadata: dict | None = None
     ) -> str:
         self._transform_node = self._lineage.register_node(
             node_type="transform", name=name, metadata=metadata
         )
         return self._transform_node
 
-    async def process_one(self, msg_id: str, raw_data: bytes) -> Optional[str]:
+    async def process_one(self, msg_id: str, raw_data: bytes) -> str | None:
         try:
             envelope = msgpack.unpackb(raw_data)
             ciphertext = envelope[b"ciphertext"]
@@ -86,7 +86,7 @@ class PipelineProcessor:
                 },
             )
             return out_id
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - worker boundary: log, audit and keep running
             logger.error("Failed to process %s: %s", msg_id, exc)
             self._audit.log(
                 action="process_error",

@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, AsyncIterator, Optional
+from collections.abc import AsyncIterator
+from typing import Any
 
 import msgpack
 
-from src.audit.logger import AuditLogger
 from src.audit.lineage import LineageTracker
+from src.audit.logger import AuditLogger
 from src.crypto.encryptor import Encryptor
 from src.crypto.signing import Signer
 
@@ -32,9 +33,9 @@ class PipelineProducer:
         self._lineage = lineage
         self._redis = redis_client
         self._stream = stream
-        self._source_node: Optional[str] = None
+        self._source_node: str | None = None
 
-    async def register_source(self, name: str, metadata: Optional[dict] = None) -> str:
+    async def register_source(self, name: str, metadata: dict | None = None) -> str:
         self._source_node = self._lineage.register_node(
             node_type="source", name=name, metadata=metadata
         )

@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import Optional
 
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from .key_manager import KeyManager
@@ -20,7 +18,7 @@ class Encryptor:
     def __init__(self, key_manager: KeyManager):
         self._km = key_manager
 
-    def encrypt(self, plaintext: bytes, aad: Optional[bytes] = None) -> bytes:
+    def encrypt(self, plaintext: bytes, aad: bytes | None = None) -> bytes:
         """Encrypt plaintext using AES-256-GCM and wrap the key with RSA-OAEP.
 
         Returns a packed byte structure:
@@ -52,7 +50,7 @@ class Encryptor:
         ]
         return b"".join(parts)
 
-    def decrypt(self, payload: bytes, aad: Optional[bytes] = None) -> bytes:
+    def decrypt(self, payload: bytes, aad: bytes | None = None) -> bytes:
         """Reverse of encrypt."""
         offset = 0
         kid_len = int.from_bytes(payload[offset : offset + 4], "big")

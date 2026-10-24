@@ -3,9 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Optional, TextIO
 
 
 @dataclass
@@ -34,7 +33,7 @@ class AuditEntry:
 class AuditLogger:
     """Tamper-evident audit log with chained hashing."""
 
-    def __init__(self, log_path: Optional[Path] = None) -> None:
+    def __init__(self, log_path: Path | None = None) -> None:
         self._log_path = log_path or Path("audit.log")
         self._entries: list[AuditEntry] = []
         self._last_hash = "0" * 64
@@ -70,7 +69,7 @@ class AuditLogger:
         self,
         action: str,
         entity_id: str,
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> AuditEntry:
         seq = len(self._entries) + 1
         entry = AuditEntry(

@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from cryptography.exceptions import InvalidTag
 
 from src.crypto.encryptor import Encryptor
 from src.crypto.key_manager import KeyManager
@@ -47,7 +48,7 @@ class TestEncryptor:
     def test_decrypt_wrong_aad_fails(self, encryptor):
         plaintext = b"AAD mismatch test"
         ciphertext = encryptor.encrypt(plaintext, aad=b"correct")
-        with pytest.raises(Exception):
+        with pytest.raises(InvalidTag):
             encryptor.decrypt(ciphertext, aad=b"wrong")
 
     def test_different_payloads(self, encryptor):
